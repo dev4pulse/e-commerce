@@ -96,6 +96,15 @@ const Header = () => {
                   About Us
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink
+                  to="/art-classes"
+                  onClick={handleNavClick}
+                  className={({ isActive }) => `nav-link nav-hover ${isActive ? "active" : ""}`}
+                >
+                  Art Classes
+                </NavLink>
+              </li>
 
               {/* Shop Dropdown (hover on desktop, click toggles too) */}
               <li
