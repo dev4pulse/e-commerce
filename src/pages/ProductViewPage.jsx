@@ -5,21 +5,22 @@ import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Share2, Star, Ruler, Calendar, Palette as PaletteIcon } from 'lucide-react';
 
 import { useCart } from '../context/CartContext';
+// Note: Ensure the filename casing matches your project (e.g., '../data/products.js' vs '../data/Products.js')
 import { getProductById, getProductsByCategory } from '../data/Products.js';
 import ProductCard from '../components/ProductCard';
 
-function ProductViewPage() {
+const ProductViewPage = () => {
   // Always call hooks at the top level, before any early returns
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
 
-  const { dispatch } = useCart();
+  const { state, dispatch } = useCart();
 
   const [product, setProduct] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
+  // Load product by id
   useEffect(() => {
     if (!id) {
       setProduct(null);
@@ -30,7 +31,7 @@ function ProductViewPage() {
     setSelectedImageIndex(0);
   }, [id]);
 
-  // Call this hook on every render; handle null inside the hook
+  // Related products (safe to call each render; returns [] if product is null)
   const relatedProducts = useMemo(() => {
     if (!product) return [];
     const slug = (s) => s.toLowerCase().replace(/\s+/g, '-');
@@ -44,6 +45,7 @@ function ProductViewPage() {
 
   const addToCart = () => {
     if (!product?.inStock) return;
+    // Keep existing behavior: add one item per quantity step to match your reducer
     for (let i = 0; i < quantity; i += 1) {
       dispatch({
         type: 'ADD_ITEM',
@@ -58,7 +60,26 @@ function ProductViewPage() {
     }
   };
 
-  // It’s now safe to return early because all hooks have been called already
+  // Wishlist: derive from global state and toggle via reducer
+  const isWishlisted = product
+    ? (state?.wishlist || []).some((w) => w.id === product.id)
+    : false;
+
+  const toggleWishlist = () => {
+    if (!product) return;
+    dispatch({
+      type: 'WISHLIST_TOGGLE',
+      payload: {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        category: product.category
+      }
+    });
+  };
+
+  // Early not found
   if (!product) {
     return (
       <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ background: 'linear-gradient(135deg,#fff1f2,#fff7ed)' }}>
@@ -75,6 +96,7 @@ function ProductViewPage() {
   return (
     <div className="min-vh-100" style={{ background: 'linear-gradient(135deg,#fff1f2,#fff7ed)' }}>
       <div className="container py-4 py-lg-5">
+        {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="mb-4">
           <ol className="breadcrumb mb-0">
             <li className="breadcrumb-item"><Link to="/" className="text-decoration-none">Home</Link></li>
@@ -84,6 +106,7 @@ function ProductViewPage() {
         </nav>
 
         <div className="row g-4 g-lg-5 mb-4">
+          {/* Gallery */}
           <div className="col-12 col-lg-6">
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="card border-0 shadow rounded-4 overflow-hidden">
               <div className="ratio ratio-1x1">
@@ -114,6 +137,7 @@ function ProductViewPage() {
             )}
           </div>
 
+          {/* Info */}
           <div className="col-12 col-lg-6">
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
               <span className="badge rounded-pill mb-3" style={{ background: '#ffe4e6', color: '#be185d' }}>{product.category}</span>
@@ -132,6 +156,7 @@ function ProductViewPage() {
 
               <p className="text-dark lead mb-4" style={{ lineHeight: 1.6 }}>{product.description}</p>
 
+              {/* Details */}
               <div className="card border-0 shadow-sm rounded-4 mb-4">
                 <div className="card-body">
                   <h3 className="h6 fw-semibold mb-3">Artwork Details</h3>
@@ -167,6 +192,7 @@ function ProductViewPage() {
                 </div>
               </div>
 
+              {/* Quantity + Actions */}
               <div className="vstack gap-3">
                 <div className="d-flex align-items-center gap-3">
                   <span className="fw-medium">Quantity:</span>
@@ -189,15 +215,23 @@ function ProductViewPage() {
                     Add to Cart
                   </motion.button>
 
+                  {/* Wishlist toggle (global) */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setIsLiked((v) => !v)}
+                    onClick={toggleWishlist}
                     className="btn rounded-4 d-inline-flex align-items-center justify-content-center"
-                    style={{ width: 56, height: 56, borderWidth: 2, borderStyle: 'solid', borderColor: isLiked ? '#d63384' : '#ced4da', background: isLiked ? '#d63384' : 'transparent', color: isLiked ? '#fff' : '#6c757d' }}
+                    style={{
+                      width: 56, height: 56,
+                      borderWidth: 2, borderStyle: 'solid',
+                      borderColor: isWishlisted ? '#d63384' : '#ced4da',
+                      background: isWishlisted ? '#d63384' : 'transparent',
+                      color: isWishlisted ? '#fff' : '#6c757d'
+                    }}
                     aria-label="Toggle wishlist"
+                    title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                   >
-                    <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />
+                    <Heart size={20} fill={isWishlisted ? 'currentColor' : 'none'} />
                   </motion.button>
 
                   <motion.button
@@ -227,6 +261,7 @@ function ProductViewPage() {
           </div>
         </div>
 
+        {/* Related */}
         {relatedProducts.length > 0 && (
           <section className="pb-2">
             <div className="d-flex align-items-center justify-content-between mb-3">
@@ -248,6 +283,6 @@ function ProductViewPage() {
       </div>
     </div>
   );
-}
+};
 
 export default ProductViewPage;

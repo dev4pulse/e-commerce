@@ -1,20 +1,34 @@
 // src/components/ProductCard.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-function ProductCard({ product }) {
-  // Always call hooks; ensure your CartContext has a default dispatch no-op
-  const { dispatch } = useCart();
+const ProductCard = ({ product }) => {
+  const { state, dispatch } = useCart();
 
-  const [liked, setLiked] = useState(false);
+  // Derive heart state from global wishlist (fallback to [] if undefined)
+  const isWishlisted = (state?.wishlist || []).some(w => w.id === product.id);
 
   const addToCart = () => {
     if (!product?.inStock) return;
     dispatch({
       type: 'ADD_ITEM',
+      payload: {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        category: product.category
+      }
+    });
+  };
+
+  const toggleWishlist = () => {
+    // Prefer a single toggle action; otherwise dispatch ADD/REMOVE based on isWishlisted
+    dispatch({
+      type: 'WISHLIST_TOGGLE',
       payload: {
         id: product.id,
         title: product.title,
@@ -43,26 +57,38 @@ function ProductCard({ product }) {
 
         {product.inStock ? (
           product.featured && (
-            <span className="badge bg-danger position-absolute top-0 end-0 m-2 rounded-pill">Featured</span>
+            <span className="badge bg-danger position-absolute top-0 end-0 m-2 rounded-pill">
+              Featured
+            </span>
           )
         ) : (
-          <span className="badge bg-secondary position-absolute top-0 end-0 m-2 rounded-pill">Sold Out</span>
+          <span className="badge bg-secondary position-absolute top-0 end-0 m-2 rounded-pill">
+            Sold Out
+          </span>
         )}
 
+        {/* Wishlist (uses global state) */}
         <button
           type="button"
-          aria-label="Toggle wishlist"
-          onClick={() => setLiked((v) => !v)}
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          onClick={toggleWishlist}
           className="btn btn-light rounded-circle p-0 d-flex align-items-center justify-content-center position-absolute"
           style={{ width: 38, height: 38, right: 8, bottom: 8 }}
         >
-          <Heart size={18} className={liked ? 'text-danger' : 'text-secondary'} fill={liked ? 'currentColor' : 'none'} />
+          <Heart
+            size={18}
+            className={isWishlisted ? 'text-danger' : 'text-secondary'}
+            fill={isWishlisted ? 'currentColor' : 'none'}
+          />
         </button>
       </div>
 
       <div className="card-body d-flex flex-column">
         <h3 className="h6 fw-semibold mb-1 line-clamp-2">{product.title}</h3>
-        <div className="text-muted small mb-2">{(product.medium || 'Artwork')} • {(product.year || '')}</div>
+        <div className="text-muted small mb-2">
+          {(product.medium || 'Artwork')} • {(product.year || '')}
+        </div>
         <p className="text-muted small mb-3 line-clamp-2">{product.description}</p>
 
         <div className="mt-auto d-flex align-items-center justify-content-between">
@@ -81,7 +107,7 @@ function ProductCard({ product }) {
               <span>Add</span>
             </motion.button>
 
-            {/* Query param route */}
+            {/* Query param route for product details */}
             <Link to={`/product-details?id=${product.id}`} className="btn btn-danger btn-sm rounded-pill">
               View
             </Link>
@@ -90,6 +116,6 @@ function ProductCard({ product }) {
       </div>
     </motion.article>
   );
-}
+};
 
 export default ProductCard;

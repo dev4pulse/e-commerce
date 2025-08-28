@@ -21,19 +21,26 @@ import CustomOrderPage from "./pages/CustomOrderPage";
 import SignupPage from "./pages/SignupPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ProductViewPage from "./pages/ProductViewPage";
-
+import PageNotFound from "./pages/PageNotFound";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import ReturnsPage from "./pages/ReturnsPage";
+import ShippingPage from "./pages/ShippingPage";
+import ArtClassesPage from "./pages/ArtClassesPage";
 // Context
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 
 // Utils
 import ScrollToTop from "./components/ScrollToTop";
+import BackToTop from "./components/BackToTop";
 
-function App() {
+const App = () => {
   return (
     <AuthProvider>
       <CartProvider>
         <Router>
+          {/* Snap to top on path/query/hash change */}
           <ScrollToTop />
           <div className="flex flex-col min-h-screen">
             {/* If Header is fixed-top/sticky, .pt-nav below prevents overlap */}
@@ -56,17 +63,27 @@ function App() {
                 <Route path="/checkout" element={<CheckoutPage />} />
                 {/* Product details reads ?id=... via useSearchParams */}
                 <Route path="/product-details" element={<ProductViewPage />} />
+                <Route path="art-classes" element={<ArtClassesPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                {/* Optional: not found */}
-                {/* <Route path="*" element={<NotFoundPage />} /> */}
+
+                {/* Legal/Policy pages */}
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/returns" element={<ReturnsPage />} />
+                <Route path="/shipping" element={<ShippingPage />} />
+
+                {/* Fallback 404 */}
+                <Route path="*" element={<PageNotFound />} />
               </Routes>
             </main>
             <Footer />
+            {/* Floating Go-To-Top button (appears after scrolling) */}
+            <BackToTop />
           </div>
         </Router>
       </CartProvider>
     </AuthProvider>
   );
-}
+};
 
 export default App;
