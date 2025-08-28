@@ -11,8 +11,11 @@ import {
   Sparkles,
   Paintbrush,
   Gem,
-  Shield
+  Shield,
+  GraduationCap,   // NEW
+  Calendar         // NEW
 } from 'lucide-react';
+import img from '../assets/pexels-steve-1070534.jpg'
 
 import HeroCarousel from '../components/HeroCarousel';
 import ProductCard from '../components/ProductCard';
@@ -56,7 +59,7 @@ function HomePage() {
       id: 'the-language-of-color',
       title: 'The Language of Color: Emotion in Abstract Art',
       image:
-        'https://images.pexels.com/photos/1727653/pexels-photo-1727653.jpeg?auto=compress&cs=tinysrgb&w=800&h=500&fit=crop',
+        img,
       excerpt:
         'Colors speak before shapes do. Explore how hue and contrast carry meaning and shape mood.',
     },
@@ -198,6 +201,65 @@ function HomePage() {
                 </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ART CLASSES (NEW) */}
+      <section className="py-5 bg-white">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-4 mb-lg-5"
+          >
+            <div className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                 style={{ width: 56, height: 56, background: '#ffe4e6', color: '#d63384' }}>
+              <GraduationCap size={26} />
+            </div>
+            <h2 className="fw-bold mb-2">Learn with Art Classes</h2>
+            <p className="lead text-muted mx-auto" style={{ maxWidth: 720 }}>
+              Live online sessions now, with offline studio classes coming soon—build skills in drawing, acrylics, and watercolor
+            </p>
+          </motion.div>
+
+          <div className="row g-3 g-lg-4 mb-4">
+            {[
+              { icon: Users, title: 'Small Cohorts', text: 'Personalized feedback and focused attention in limited-size groups.' },
+              { icon: Calendar, title: 'Flexible Schedule', text: 'Weekend and evening batches designed around busy calendars.' },
+              { icon: Paintbrush, title: 'Guided Techniques', text: 'Step‑by‑step demos to master fundamentals and explore styles.' }
+            ].map((f, i) => (
+              <motion.div
+                key={f.title}
+                className="col-12 col-md-4"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+              >
+                <div className="card h-100 border-0 shadow-sm rounded-4">
+                  <div className="card-body">
+                    <div
+                      className="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                      style={{ width: 44, height: 44, background: '#fff1f2' }}
+                    >
+                      <f.icon size={20} style={{ color: '#d63384' }} />
+                    </div>
+                    <h6 className="fw-semibold mb-1">{f.title}</h6>
+                    <p className="text-muted small mb-0">{f.text}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link to="/art-classes" className="btn btn-danger px-4 py-3 fw-semibold rounded-pill d-inline-flex align-items-center gap-2">
+              Explore Art Classes
+              <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>

@@ -1,6 +1,16 @@
+// src/pages/ContactPage.jsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send, Instagram, Facebook, Twitter, CheckCircle } from 'lucide-react';
+
+// Country codes (edit or extend as needed)
+const COUNTRY_CODES = [
+  { code: 'IN', name: 'India',         dial: '+91', flag: '🇮🇳' },
+  { code: 'US', name: 'United States', dial: '+1',  flag: '🇺🇸' },
+  { code: 'GB', name: 'United Kingdom',dial: '+44', flag: '🇬🇧' },
+  { code: 'CA', name: 'Canada',        dial: '+1',  flag: '🇨🇦' },
+  { code: 'AU', name: 'Australia',     dial: '+61', flag: '🇦🇺' },
+];
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -9,12 +19,18 @@ const ContactPage = () => {
     subject: '',
     message: '',
     customOrder: false,
-    phone: ''
+    phone: '',
+    countryCode: '+91', // default
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Compose a single phone string if needed for backend submission
+    const fullPhone = `${formData.countryCode} ${formData.phone}`.trim();
+    // TODO: send `fullPhone` with other payload fields to the backend
+
     setTimeout(() => {
       setIsSubmitted(true);
       setTimeout(() => setIsSubmitted(false), 5000);
@@ -173,17 +189,41 @@ const ContactPage = () => {
                     />
                   </div>
 
+                  {/* Phone with country code select (flag + dial only) */}
                   <div className="col-md-6">
                     <label className="form-label small fw-semibold">Phone Number</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="form-control"
-                      placeholder="+1 (555) 123-4567"
-                    />
+                    <div className="input-group">
+                      <select
+                        name="countryCode"
+                        aria-label="Country code"
+                        className="form-select flex-shrink-0"
+                        style={{ maxWidth: 110 }}  // tighter since we show only flag + dial
+                        value={formData.countryCode}
+                        onChange={handleChange}
+                      >
+                        {COUNTRY_CODES.map((c) => (
+                          <option key={c.code} value={c.dial} title={`${c.name} (${c.dial})`}>
+                            {c.flag} {c.dial}
+                          </option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="form-control"
+                        placeholder="1234567890"
+                        inputMode="tel"
+                        autoComplete="tel"
+                      />
+                    </div>
+                    <small className="text-muted">
+                      Enter local number only; the country code is selected on the left.
+                    </small>
                   </div>
+
                   <div className="col-md-6">
                     <label className="form-label small fw-semibold">Subject</label>
                     <select

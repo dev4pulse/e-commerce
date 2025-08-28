@@ -1,7 +1,7 @@
 /* If using fixed-top navbar, offset page content */
 .pt-nav {
   /* Adjust to your navbar height (56px default for Bootstrap’s .navbar) */
-  padding-top: 64px;
+  padding-top: 100px;
 }
 
 /* Optional: active nav styling */

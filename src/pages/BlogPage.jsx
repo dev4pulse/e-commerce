@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Calendar, Clock, Tag, User, ChevronRight, ArrowRight } from 'lucide-react';
+import img from '../assets/pexels-steve-1070534.jpg'
 
 // Sample posts (replace with real data or fetch)
 const samplePosts = [
@@ -12,7 +13,7 @@ const samplePosts = [
     excerpt:
       'Colors speak before shapes do. Explore how hue, saturation, and contrast carry meaning and shape the mood of a painting.',
     image:
-      'https://images.pexels.com/photos/1727653/pexels-photo-1727653.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop',
+      img,
     author: 'ArtistryStudio',
     date: '2025-07-28T09:00:00Z',
     category: 'Studio Notes',

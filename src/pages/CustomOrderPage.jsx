@@ -47,7 +47,7 @@ function CustomOrderPage() {
               <Palette size={28} className="text-white" />
             </div>
           </div>
-          <h1 className="fw-bold display-6 mb-2">Custom Art Commission</h1>
+          <h1 className="fw-bold display-6 mb-2">Commission Custom Art</h1>
           <p className="lead text-muted mx-auto" style={{ maxWidth: 720 }}>
             Bring a vision to life with a personalized artwork created just for the brief.
           </p>
@@ -308,13 +308,12 @@ function CustomOrderPage() {
               <div>
                 <h3 className="h6 fw-semibold mb-1">Can changes be requested during the process?</h3>
                 <p className="text-muted mb-0">
-                  Yes—progress photos are provided and minor adjustments are welcome to ensure complete satisfaction.
+                  Yes progress photos are provided and minor adjustments are welcome to ensure complete satisfaction.
                 </p>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

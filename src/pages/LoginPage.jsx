@@ -3,12 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
-// If available in your project:
 import { useAuth } from '../context/AuthContext';
 
 const EMAIL_KEY = 'rememberEmail';
 
-function LoginPage() {
+const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from || '/';
@@ -246,6 +245,6 @@ function LoginPage() {
       </div>
     </div>
   );
-}
+};
 
 export default LoginPage;

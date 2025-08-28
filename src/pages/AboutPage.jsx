@@ -1,7 +1,8 @@
-// AboutPage.jsx — Bootstrap version (fully updated)
+// AboutPage.jsx — Bootstrap version (fixed overflow/right margin)
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Award, Calendar, Palette, Users, Star, Heart } from 'lucide-react';
+import { Award, Palette, Users, Star, Heart } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 const AboutPage = () => {
   const milestones = [
@@ -27,7 +28,40 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-vh-100" style={{ background: 'linear-gradient(135deg,#fff1f2,#fff7ed)' }}>
+    <div className="min-vh-100 about-root" style={{ background: 'linear-gradient(135deg,#fff1f2,#fff7ed)' }}>
+      {/* Local, page-scoped CSS to prevent horizontal overflow */}
+      <style>{`
+        .about-root { overflow-x: clip; }
+        @supports not (overflow: clip) { .about-root { overflow-x: hidden; } }
+
+        /* Ensure media never causes layout shifts */
+        .about-hero-img { display:block; width:100%; height:600px; object-fit:cover; }
+
+        /* Keep timeline visuals inside the container box */
+        .timeline-wrap { position: relative; overflow: clip; }
+        @supports not (overflow: clip) { .timeline-wrap { overflow: hidden; } }
+
+        /* Optional: if you draw a center line/dots, keep them centered without overflow */
+        .timeline-line {
+          position:absolute; top:0; bottom:0; left:50%; width:2px;
+          transform:translateX(-1px);
+          background: linear-gradient(180deg,#ffd1dc,#ffe3c2);
+        }
+        .timeline-dot {
+          position:absolute; left:50%; transform:translate(-50%, -50%);
+          width:12px; height:12px; border-radius:50%;
+          background: linear-gradient(90deg,#d63384,#fd7e14);
+          box-shadow: 0 0 0 3px rgba(255,255,255,.9);
+        }
+
+        /* Keep the floating rating card inside the image bounds on all screens */
+        .rating-card {
+          left: 16px; bottom: 16px; transform: none; /* was left:-24; bottom:-24; translateY(-50%) */
+        }
+
+        /* Bootstrap rows already manage gutters; no negative margins outside .container */
+      `}</style>
+
       {/* Hero */}
       <section className="py-5">
         <div className="container">
@@ -63,13 +97,13 @@ const AboutPage = () => {
                   <img
                     src="https://images.pexels.com/photos/1183992/pexels-photo-1183992.jpeg?auto=compress&cs=tinysrgb&w=600&h=800&fit=crop"
                     alt="Artist at work"
-                    className="w-100"
-                    style={{ height: 600, objectFit: 'cover' }}
+                    className="about-hero-img"
                   />
                   <div className="position-absolute top-0 start-0 w-100 h-100" style={{ background: 'linear-gradient(to top, rgba(0,0,0,.35), transparent)' }} />
                 </div>
 
-                <div className="position-absolute translate-middle-y" style={{ bottom: -24, left: -24 }}>
+                {/* Keep inside the image (no negative offsets) */}
+                <div className="position-absolute rating-card">
                   <div className="bg-white p-3 rounded-4 shadow">
                     <div className="d-flex align-items-center gap-1 text-warning mb-1">
                       <Star size={18} fill="currentColor" />
@@ -162,7 +196,8 @@ const AboutPage = () => {
                       </div>
                       <div className={`col-12 col-lg-6 ${left ? 'order-lg-2' : ''}`} />
                     </div>
-                    <div className="timeline-dot" />
+                    {/* Optional dot; if using, position it with top relative to the block */}
+                    {/* <div className="timeline-dot" style={{ top: '50%' }} /> */}
                   </motion.div>
                 );
               })}
@@ -238,8 +273,17 @@ const AboutPage = () => {
             <h2 className="fw-bold mb-2">Ready to Start Your Art Collection?</h2>
             <p className="lead text-white-50 mb-4">Explore the gallery or commission a custom piece that speaks to your heart</p>
             <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-              <button className="btn btn-light text-danger fw-semibold rounded-pill px-4">Browse Gallery</button>
-              <button className="btn btn-outline-light fw-semibold rounded-pill px-4">Commission Custom Art</button>
+              <Link to="/gallery" className="text-decoration-none"> {/* Browse Gallery */}
+                <button className="btn btn-light text-danger fw-semibold rounded-pill px-4">
+                  Browse Gallery
+                </button>
+              </Link>
+                      
+              <Link to="/custom-order" className="text-decoration-none"> {/* Commission Custom Art */}
+                <button className="btn btn-outline-light fw-semibold rounded-pill px-4">
+                  Commission Custom Art
+                </button>
+              </Link>
             </div>
           </motion.div>
         </div>

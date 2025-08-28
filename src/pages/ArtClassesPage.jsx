@@ -61,7 +61,7 @@ const ArtClassesPage = () => {
             <Wifi size={18} />
           </div>
           <div className="flex-grow-1">
-            <div className="fw-semibold">Online art classes running now</div>
+            <div className="fw-semibold">Online art classes registrations open now</div>
             <div className="text-muted small">Offline studio classes available soon</div>
           </div>
         </div>

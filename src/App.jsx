@@ -27,6 +27,8 @@ import PrivacyPage from "./pages/PrivacyPage";
 import ReturnsPage from "./pages/ReturnsPage";
 import ShippingPage from "./pages/ShippingPage";
 import ArtClassesPage from "./pages/ArtClassesPage";
+import AdminDashboard from "./pages/AdminDashboard";
+
 // Context
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -34,6 +36,9 @@ import { AuthProvider } from "./context/AuthContext";
 // Utils
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/BackToTop";
+
+// New: floating falling cart button
+import FallingCart from "./components/FallingCart";
 
 const App = () => {
   return (
@@ -65,6 +70,7 @@ const App = () => {
                 <Route path="/product-details" element={<ProductViewPage />} />
                 <Route path="art-classes" element={<ArtClassesPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/admin" element={<AdminDashboard />} />
 
                 {/* Legal/Policy pages */}
                 <Route path="/terms" element={<TermsPage />} />
@@ -77,6 +83,18 @@ const App = () => {
               </Routes>
             </main>
             <Footer />
+
+            {/* Floating falling cart (click -> /cart).
+               bottomOffset should sit just above BackToTop’s position/size. */}
+            <FallingCart
+              right={16}
+              bottomOffset={84}    // sit above BackToTop
+              speedFactor={2.2}    // tune scroll sensitivity (higher = slower)
+              maxStart={1.1}       // how far above view to start (in viewport heights)
+              size={22}
+              navigateTo="/cart"
+            />
+
             {/* Floating Go-To-Top button (appears after scrolling) */}
             <BackToTop />
           </div>

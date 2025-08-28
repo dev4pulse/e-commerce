@@ -6,6 +6,7 @@ import {
   Mail, MapPin, Phone, Instagram, Facebook, Twitter, Youtube, ArrowRight
 } from 'lucide-react';
 import './Footer.css';
+import logo from '../assets/pnpfooterlogo.png'; 
 
 const year = new Date().getFullYear();
 
@@ -29,16 +30,16 @@ const Footer = () => {
           {/* Brand + About */}
           <div className="col-12 col-md-6 col-lg-4">
             <div className="d-flex align-items-center gap-2 mb-3">
-              <div
-                className="rounded-circle d-flex align-items-center justify-content-center"
-                style={{
-                  width: 48,
-                  height: 48,
-                  background: 'linear-gradient(135deg,#fb7185,#f59f0b)'
-                }}
-              >
-                <span className="text-white fw-bold fs-5">P</span>
-              </div>
+              {/* Replaced circle "P" with logo */}
+              <img
+                src={logo}
+                alt="PnpArtStudio — by Priyanka Vasishta"
+                className="footer-logo"
+                height={44}
+                width={44}
+                loading="eager"
+                decoding="async"
+              />
               <div className="lh-1">
                 <div
                   className="fw-bold fs-5 footer-brand-gradient"
@@ -50,7 +51,7 @@ const Footer = () => {
                 >
                   PnpArtStudio
                 </div>
-                <small className="text-muted-contrast">Original Paintings &amp; Art</small>
+                <small className="text-muted-contrast">Original Paintings &amp; Art by Priyanka Vasishta</small>
               </div>
             </div>
 
@@ -86,19 +87,7 @@ const Footer = () => {
               <motion.a
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.95 }}
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Twitter"
-                className="btn btn-outline-light rounded-circle p-0 d-flex align-items-center justify-content-center"
-                style={{ width: 40, height: 40 }}
-              >
-                <Twitter size={18} />
-              </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.95 }}
-                href="https://youtube.com"
+                href="https://youtube.com/@pnpartstudio?si=XtS7itrq6cyrgOdw"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="YouTube"

@@ -3,10 +3,10 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, Phone, UserPlus, CheckCircle } from 'lucide-react';
-// If available in your project:
 import { useAuth } from '../context/AuthContext';
 
-function strengthScore(pw) {
+// Helpers as arrow functions
+const strengthScore = (pw) => {
   let score = 0;
   if (!pw) return 0;
   if (pw.length >= 8) score += 1;
@@ -15,9 +15,9 @@ function strengthScore(pw) {
   if (/\d/.test(pw)) score += 1;
   if (/[^A-Za-z0-9]/.test(pw)) score += 1;
   return Math.min(score, 5);
-}
+};
 
-function strengthLabel(score) {
+const strengthLabel = (score) => {
   switch (score) {
     case 0: return 'Too short';
     case 1: return 'Very weak';
@@ -27,11 +27,12 @@ function strengthLabel(score) {
     case 5: return 'Very strong';
     default: return '';
   }
-}
+};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function SignupPage() {
+// Component as arrow function
+const SignupPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from || '/';
@@ -59,16 +60,16 @@ export default function SignupPage() {
   const pwPercent = (pwScore / 5) * 100;
   const pwBarClass = pwScore <= 2 ? 'bg-danger' : pwScore === 3 ? 'bg-warning' : 'bg-success';
 
-  function validate() {
+  const validate = () => {
     if (!fullName.trim()) return 'Please enter full name.';
     if (!EMAIL_RE.test(email)) return 'Please enter a valid email address.';
     if (password.length < 8) return 'Password must be at least 8 characters.';
     if (password !== confirm) return 'Passwords do not match.';
     if (!accept) return 'Please accept the Terms and Privacy Policy.';
     return '';
-  }
+  };
 
-  async function onSubmit(e) {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
     setFormSuccess('');
@@ -98,7 +99,7 @@ export default function SignupPage() {
     } finally {
       setSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-vh-100 d-flex align-items-center" style={{ background: 'linear-gradient(135deg,#fff1f2,#fff7ed)' }}>
@@ -345,4 +346,6 @@ export default function SignupPage() {
       </div>
     </div>
   );
-}
+};
+
+export default SignupPage;
