@@ -6,10 +6,11 @@ import { ShoppingCart, User, Heart, X } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import CartDropdown from "./CartDropdown";
+import "./Header.css";
 
 const Header = () => {
   const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false); // mobile collapse state
+  const [isOpen, setIsOpen] = useState(false);
 
   const { totalItems, dispatch } = useCart();
   const { user, logout } = useAuth();
@@ -30,7 +31,6 @@ const Header = () => {
     if (dispatch) dispatch({ type: "TOGGLE_CART" });
   };
 
-  // Close mobile menu on any nav link click
   const handleNavClick = () => {
     setIsOpen(false);
     setIsShopDropdownOpen(false);
@@ -96,6 +96,7 @@ const Header = () => {
                   About Us
                 </NavLink>
               </li>
+
               <li className="nav-item">
                 <NavLink
                   to="/art-classes"
@@ -188,7 +189,9 @@ const Header = () => {
               <li className="nav-item">
                 <NavLink
                   to="/wishlist"
-                  className={({ isActive }) => `nav-link d-flex align-items-center nav-hover ${isActive ? "active" : ""}`}
+                  className={({ isActive }) =>
+                    `nav-link d-flex align-items-center nav-hover ${isActive ? "active" : ""}`
+                  }
                   onClick={handleNavClick}
                 >
                   <Heart size={20} />
@@ -237,7 +240,9 @@ const Header = () => {
                 ) : (
                   <NavLink
                     to="/login"
-                    className={({ isActive }) => `nav-link d-flex align-items-center nav-hover ${isActive ? "active" : ""}`}
+                    className={({ isActive }) =>
+                      `nav-link d-flex align-items-center nav-hover ${isActive ? "active" : ""}`
+                    }
                     onClick={handleNavClick}
                   >
                     <User size={20} />
