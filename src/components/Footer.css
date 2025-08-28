@@ -1,0 +1,8 @@
+/* Subtle link hover */
+.footer-link:hover { color: #d63384 !important; }
+
+/* Optional input focus ring that matches brand */
+.form-control:focus {
+  border-color: #ffd1dc;
+  box-shadow: 0 0 0 .2rem rgba(214, 51, 132, .15);
+}
