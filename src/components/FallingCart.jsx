@@ -1,83 +1,97 @@
+// src/components/FallingCart.jsx
 import React, { useEffect, useRef } from "react";
 import { ShoppingCart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./FallingCart.css";
 
 /**
- * Auto-falling cart that slows down while the user scrolls.
- * - Uses WAAPI to animate from -101vh to 0 (rest), repeats once (no reset).
- * - Scroll velocity reduces playbackRate toward a floor; on idle it eases back to 1.
- * - Hover/focus reveals ripple; click navigates to /cart.
+ * Auto-falling cart that:
+ * - Starts falling on mount and on every route change (location.pathname)
+ * - Slows proportionally while scrolling (modulates playbackRate)
+ * - Pauses with ripple on hover/focus
+ * - Navigates to /cart on click (configurable)
  */
 const FallingCart = ({
-  right = 16,              // px from right edge
-  bottomOffset = 88,       // resting offset above BackToTop
-  durationMs = 14000,      // baseline fall duration in ms (larger = slower overall)
-  delayMs = 200,           // start delay in ms
-  minRate = 0.15,          // slowest playbackRate under heavy scrolling
-  easeBackMs = 400,        // time to ease back to rate=1 after scroll stops
-  scrollSensitivity = 0.004, // map |scrollVelocity| to slow down amount
-  size = 22,               // icon size
+  right = 16,
+  bottomOffset = 88,
+  durationMs = 14000,      // total fall time
+  delayMs = 200,           // start delay per page
+  minRate = 0.15,          // slowest rate under scroll
+  easeBackMs = 400,        // ease back to 1 after scroll stops
+  scrollSensitivity = 0.004, // map scroll velocity to slowdown
+  size = 22,
   navigateTo = "/cart",
   ariaLabel = "Go to cart",
   className = ""
 }) => {
   const navigate = useNavigate();
+  const location = useLocation(); // restart on pathname change [2]
   const hostRef = useRef(null);
   const animRef = useRef(null);
 
   // Scroll velocity tracking
   const lastY = useRef(0);
   const lastT = useRef(0);
-  const targetRate = useRef(1);   // desired rate based on scroll velocity
-  const isHovering = useRef(false);
-  const rafWrite = useRef(0);
+  const rafScroll = useRef(0);
   const rafEase = useRef(0);
+  const stopTimer = useRef(0);
 
-  // Start WAAPI fall animation once
-  useEffect(() => {
+  const startFall = () => {
     const el = hostRef.current;
     if (!el) return;
 
-    // Initialize off-screen transform; CSS will also set a default
-    el.style.setProperty("--fc-ty", `${-1.01 * window.innerHeight}px`);
-    el.style.transform = `translateY(var(--fc-ty))`;
+    // Cancel any previous animation
+    if (animRef.current) {
+      try { animRef.current.cancel(); } catch {}
+      animRef.current = null;
+    }
 
-    // Create the animation: translateY(-101vh) -> translateY(0)
+    // Reset transform to start above view for each page
+    const startY = -1.01 * Math.max(window.innerHeight, 1);
+    el.style.transform = `translateY(${startY}px)`;
+
+    // Create WAAPI animation (translateY: start -> 0)
     const fall = el.animate(
-      [
-        { transform: `translateY(${-1.01 * window.innerHeight}px)` },
-        { transform: `translateY(0px)` }
-      ],
+      [{ transform: `translateY(${startY}px)` }, { transform: "translateY(0px)" }],
       {
         duration: durationMs,
         delay: delayMs,
         easing: "cubic-bezier(.22,.61,.36,1)",
         fill: "forwards",
-        iterations: 1
+        iterations: 1,
       }
     );
 
-    fall.playbackRate = 1; // baseline
+    fall.playbackRate = 1; // baseline forward speed [6]
     animRef.current = fall;
 
-    return () => {
-      fall.cancel();
-      animRef.current = null;
-    };
-  }, [durationMs, delayMs]);
+    // Initialize velocity baseline for this page
+    lastY.current = window.scrollY || 0;
+    lastT.current = performance.now();
+  };
 
-  // rAF writer to apply current targetRate smoothly via updatePlaybackRate()
+  // Start on mount and on every route change (pathname)
   useEffect(() => {
-    const stepEase = (startTime, startRate) => {
+    startFall(); // re-create the animation per page [2]
+    return () => {
+      if (animRef.current) {
+        try { animRef.current.cancel(); } catch {}
+        animRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]); // only when path changes [1]
+
+  // Scroll-based slowdown: modulate playbackRate via rAF
+  useEffect(() => {
+    const easeBack = (startRate, startTime) => {
       if (!animRef.current) return;
       const now = performance.now();
       const t = Math.min(1, (now - startTime) / easeBackMs);
       const eased = startRate + (1 - startRate) * t;
-      // Use updatePlaybackRate for smooth sync to current position
-      animRef.current.updatePlaybackRate(eased); // MDN recommends this for better sync [3]
+      animRef.current.updatePlaybackRate(eased); // synced speed change [11]
       if (t < 1) {
-        rafEase.current = requestAnimationFrame(() => stepEase(startTime, startRate));
+        rafEase.current = requestAnimationFrame(() => easeBack(startRate, startTime));
       } else {
         rafEase.current = 0;
       }
@@ -85,72 +99,52 @@ const FallingCart = ({
 
     const applyRate = (rate) => {
       if (!animRef.current) return;
-      // For immediate response during scroll, set synchronously
-      animRef.current.playbackRate = rate; // fast feedback [1]
-      // When scroll stops, ease back to 1
+      animRef.current.playbackRate = rate; // immediate response while scrolling [6]
       if (rate === 1) return;
       if (rafEase.current) cancelAnimationFrame(rafEase.current);
-      const startRate = rate;
-      const startTime = performance.now();
-      rafEase.current = requestAnimationFrame(() => stepEase(startTime, startRate));
+      rafEase.current = requestAnimationFrame(() => easeBack(rate, performance.now()));
     };
 
-    let scrollRaf = 0;
-    let stopTimer = 0;
-
     const onScroll = () => {
-      if (!animRef.current) return;
-      if (scrollRaf) return;
-      scrollRaf = requestAnimationFrame(() => {
-        scrollRaf = 0;
-        const y = window.scrollY || window.pageYOffset || 0;
-        const t = performance.now();
+      if (rafScroll.current) return;
+      rafScroll.current = requestAnimationFrame(() => {
+        rafScroll.current = 0;
+        if (!animRef.current) return;
 
-        if (lastT.current === 0) {
+        const y = window.scrollY || 0;
+        const t = performance.now();
+        if (!lastT.current) {
           lastY.current = y;
           lastT.current = t;
           return;
         }
-
         const dy = y - lastY.current;
         const dt = Math.max(1, t - lastT.current);
-        const vel = Math.abs(dy) / dt; // px per ms
-
         lastY.current = y;
         lastT.current = t;
 
-        // Map velocity to a slowdown factor: higher vel -> lower rate
-        const slowdown = Math.min(0.9, vel / Math.max(0.00001, scrollSensitivity)); // cap slowdown
-        const newRate = Math.max(minRate, 1 - slowdown);
+        const vel = Math.abs(dy) / dt; // px/ms
+        const slowdown = Math.min(0.9, vel / Math.max(0.00001, scrollSensitivity));
+        const rate = Math.max(minRate, 1 - slowdown); // clamp to minRate
+        applyRate(rate);
 
-        targetRate.current = newRate;
-        applyRate(newRate);
-
-        // When scrolling stops for 180ms, ease back to 1
-        if (stopTimer) clearTimeout(stopTimer);
-        stopTimer = window.setTimeout(() => {
-          targetRate.current = 1;
-          applyRate(1);
-        }, 180);
+        if (stopTimer.current) clearTimeout(stopTimer.current);
+        stopTimer.current = window.setTimeout(() => applyRate(1), 180);
       });
     };
 
-    // Initialize velocity baseline
-    lastY.current = window.scrollY || 0;
-    lastT.current = performance.now();
-
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
-
     return () => {
-      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      if (rafScroll.current) cancelAnimationFrame(rafScroll.current);
       if (rafEase.current) cancelAnimationFrame(rafEase.current);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      if (stopTimer.current) clearTimeout(stopTimer.current);
     };
   }, [easeBackMs, minRate, scrollSensitivity]);
 
-  // Hover should pause visually (ripple still plays); we’ll just set rate near zero while hovered.
+  // Hover to pause visually: set rate ≈ 0; resume to 1 on leave
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
@@ -158,12 +152,10 @@ const FallingCart = ({
     if (!btn) return;
 
     const onEnter = () => {
-      isHovering.current = true;
-      if (animRef.current) animRef.current.playbackRate = 0; // effectively pause [1]
+      if (animRef.current) animRef.current.playbackRate = 0; // pause effect [6]
     };
     const onLeave = () => {
-      isHovering.current = false;
-      if (animRef.current) animRef.current.updatePlaybackRate(1); // smooth resume [3]
+      if (animRef.current) animRef.current.updatePlaybackRate(1); // smooth resume [11]
     };
 
     btn.addEventListener("mouseenter", onEnter);
@@ -179,10 +171,6 @@ const FallingCart = ({
     };
   }, []);
 
-  const handleClick = () => {
-    navigate(navigateTo);
-  };
-
   return (
     <div
       ref={hostRef}
@@ -193,7 +181,7 @@ const FallingCart = ({
         type="button"
         className="fc-btn"
         aria-label={ariaLabel}
-        onClick={handleClick}
+        onClick={() => navigate(navigateTo)}
       >
         <ShoppingCart size={size} />
         <span className="ripples" aria-hidden="true" />
