@@ -1,6 +1,6 @@
 // src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom"; // add useLocation [1]
 import "./index.css";
 
 // Layout
@@ -37,27 +37,47 @@ import { AuthProvider } from "./context/AuthContext";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/BackToTop";
 
-// New: floating falling cart button
+// Floating cart
 import FallingCart from "./components/FallingCart";
+
+// Helper rendered inside Router so useLocation works
+const RouteAwareFallingCart = () => {
+  const location = useLocation(); // safe here because we're inside <Router> [1]
+  const showFallingCart =
+    location.pathname === "/" || location.pathname.startsWith("/shop"); // covers /shop and /shop/category/... [1]
+
+  if (!showFallingCart) return null;
+  return (
+    <FallingCart
+      right={16}
+      bottomOffset={84}
+      // Keep whichever props your current FallingCart supports:
+      // If using the scroll-linked version:
+      speedFactor={2.2}
+      maxStart={1.1}
+      // If using the WAAPI auto-fall version, you can instead pass:
+      // durationMs={14000}
+      // delayMs={200}
+      size={22}
+      navigateTo="/cart"
+    />
+  );
+};
 
 const App = () => {
   return (
     <AuthProvider>
       <CartProvider>
         <Router>
-          {/* Snap to top on path/query/hash change */}
           <ScrollToTop />
           <div className="flex flex-col min-h-screen">
-            {/* If Header is fixed-top/sticky, .pt-nav below prevents overlap */}
             <Header />
             <main className="flex-grow pt-nav">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/shop" element={<ShopPage />} />
-                {/* Category route (slug) */}
                 <Route path="/shop/category/:category" element={<ShopPage />} />
-
                 <Route path="/gallery" element={<GalleryPage />} />
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/contact" element={<ContactPage />} />
@@ -66,36 +86,22 @@ const App = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/custom-order" element={<CustomOrderPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
-                {/* Product details reads ?id=... via useSearchParams */}
                 <Route path="/product-details" element={<ProductViewPage />} />
                 <Route path="art-classes" element={<ArtClassesPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/admin" element={<AdminDashboard />} />
-
-                {/* Legal/Policy pages */}
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/returns" element={<ReturnsPage />} />
                 <Route path="/shipping" element={<ShippingPage />} />
-
-                {/* Fallback 404 */}
                 <Route path="*" element={<PageNotFound />} />
               </Routes>
             </main>
             <Footer />
 
-            {/* Floating falling cart (click -> /cart).
-               bottomOffset should sit just above BackToTop’s position/size. */}
-            <FallingCart
-              right={16}
-              bottomOffset={84}    // sit above BackToTop
-              speedFactor={2.2}    // tune scroll sensitivity (higher = slower)
-              maxStart={1.1}       // how far above view to start (in viewport heights)
-              size={22}
-              navigateTo="/cart"
-            />
+            {/* Render only on "/" and "/shop..." */}
+            <RouteAwareFallingCart /> {/* inside Router so the hook works */} {/* [1] */}
 
-            {/* Floating Go-To-Top button (appears after scrolling) */}
             <BackToTop />
           </div>
         </Router>

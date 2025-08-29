@@ -1,7 +1,7 @@
 // src/pages/ContactPage.jsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Send, Instagram, Facebook, Twitter, CheckCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, Instagram, Facebook, CheckCircle, Youtube } from 'lucide-react';
 
 // Country codes (edit or extend as needed)
 const COUNTRY_CODES = [
@@ -57,7 +57,7 @@ const ContactPage = () => {
     {
       icon: Phone,
       title: 'Call Us',
-      details: '+1 (555) 123-4567',
+      details: '+1 (713) 576‑9741',
       subDetails: 'Mon - Fri, 9am - 6pm',
       iconBg: '#ffedd5',
       iconColor: '#ea580c'
@@ -65,7 +65,7 @@ const ContactPage = () => {
     {
       icon: Mail,
       title: 'Email Us',
-      details: 'hello@artistrystudio.com',
+      details: 'pnp.artstudio7@gmail.com',
       subDetails: "We'll respond within 24 hours",
       iconBg: '#fef3c7',
       iconColor: '#d97706'
@@ -81,9 +81,9 @@ const ContactPage = () => {
   ];
 
   const socialLinks = [
-    { icon: Instagram, href: '#', label: 'Instagram', bg: '#ec4899' },
-    { icon: Facebook,  href: '#', label: 'Facebook',  bg: '#2563eb' },
-    { icon: Twitter,   href: '#', label: 'Twitter',   bg: '#38bdf8' }
+    { icon: Instagram, href: 'https://www.instagram.com/pnp.artstudio/?igsh=MThxbzJsZHg1d29rYw%3D%3D#', label: 'Instagram', bg: '#ec4899' },
+    { icon: Facebook,  href: 'https://www.facebook.com/people/PnP-art-studio/100064142585253/', label: 'Facebook',  bg: '#2563eb' },
+    { icon: Youtube,   href: 'https://www.youtube.com/@pnpartstudio', label: 'Twitter',   bg: '#38bdf8' }
   ];
 
   return (
@@ -340,6 +340,7 @@ const ContactPage = () => {
                           className="text-white d-inline-flex align-items-center justify-content-center rounded-3 shadow-sm"
                           style={{ width: 44, height: 44, background: s.bg }}
                           aria-label={s.label}
+                          target='_blank'
                         >
                           <Icon size={20} />
                         </motion.a>

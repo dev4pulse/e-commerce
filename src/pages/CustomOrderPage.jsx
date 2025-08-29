@@ -1,8 +1,8 @@
-// CustomOrderPage.jsx (Bootstrap version)
+// src/pages/CustomOrderPage.jsx
 import React, { useState } from 'react';
 import { Palette, Upload, MessageSquare, Calendar, DollarSign, CheckCircle } from 'lucide-react';
 
-function CustomOrderPage() {
+const CustomOrderPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -21,8 +21,8 @@ function CustomOrderPage() {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData(prev => ({ ...prev, reference: e.target.files[0] }));
+    if (e.target.files && e.target.files) {
+      setFormData(prev => ({ ...prev, reference: e.target.files }));
     }
   };
 
@@ -31,28 +31,86 @@ function CustomOrderPage() {
     console.log('Custom order submitted:', formData);
   };
 
+  // FAQ data
+  const faqs = [
+    {
+      q: 'How long does a commission take?',
+      a: 'Typical turnaround is 2–4 weeks depending on size and complexity; rush options may be available for an additional fee.'
+    },
+    {
+      q: 'What’s included in the price?',
+      a: 'Artwork, protective varnish, and a certificate of authenticity; framing and shipping are additional.'
+    },
+    {
+      q: 'Can changes be requested during the process?',
+      a: 'Yes, progress photos are provided and minor adjustments are welcome to ensure satisfaction.'
+    },
+    {
+      q: 'Do you ship internationally?',
+      a: 'Yes, worldwide shipping is available with tracked delivery and protective packaging.'
+    },
+    {
+      q: 'What file types can be uploaded as references?',
+      a: 'PNG and JPG are preferred; high-resolution images help achieve accurate results.'
+    },
+    {
+      q: 'Can a specific deadline be met?',
+      a: 'Deadlines can often be accommodated depending on scope; sharing the date in the form helps confirm feasibility.'
+    },
+    {
+      q: 'What mediums are supported?',
+      a: 'Acrylics, watercolor, charcoal, and mixed media are available for most commissions.'
+    },
+    {
+      q: 'How are payments handled?',
+      a: 'A 50% advance secures the slot, with the balance due on approval before shipping.'
+    }
+  ];
+
+  // Show-more state (initial 4, add 4 more per click; Show less resets to 4)
+  const [visibleFaqs, setVisibleFaqs] = useState(4);
+
   return (
     <div
       className="min-vh-100 py-5"
       style={{ background: 'linear-gradient(135deg,#fffbeb,#fff7ed,#ffe4e6)' }}
     >
-      <div className="container" style={{ maxWidth: 960 }}>
-        {/* Header */}
-        <div className="text-center mb-5">
-          <div className="d-flex justify-content-center mb-3">
-            <div
-              className="rounded-circle p-3 d-flex align-items-center justify-content-center"
-              style={{ background: 'linear-gradient(90deg,#d63384,#fd7e14)' }}
-            >
-              <Palette size={28} className="text-white" />
+      {/* Top container with GIF hero about commissions */}
+      <div className="container mb-4">
+        <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div className="row g-0 align-items-center">
+            <div className="col-12 col-lg-6">
+              {/* Responsive media: animated GIF image hero */}
+              <img
+                src="https://media.giphy.com/media/l2SpU6dD9GfVwqVmg/giphy.gif"
+                alt="Commission custom art in action"
+                className="w-100"
+                loading="lazy"
+                style={{ height: 320, objectFit: 'cover' }}
+              />
+            </div>
+            <div className="col-12 col-lg-6">
+              <div className="p-4 p-lg-5">
+                <div className="d-flex justify-content-start mb-3">
+                  <div
+                    className="rounded-circle p-3 d-flex align-items-center justify-content-center"
+                    style={{ background: 'linear-gradient(90deg,#d63384,#fd7e14)' }}
+                  >
+                    <Palette size={28} className="text-white" />
+                  </div>
+                </div>
+                <h2 className="fw-bold mb-2">Commission Custom Art</h2>
+                <p className="text-muted mb-0">
+                  Transform ideas into one‑of‑a‑kind pieces crafted to brief, budget, and timeline. 
+                </p>
+              </div>
             </div>
           </div>
-          <h1 className="fw-bold display-6 mb-2">Commission Custom Art</h1>
-          <p className="lead text-muted mx-auto" style={{ maxWidth: 720 }}>
-            Bring a vision to life with a personalized artwork created just for the brief.
-          </p>
         </div>
+      </div>
 
+      {/* Main content container */}
+      <div className="container" style={{ maxWidth: 960 }}>
         {/* Process Steps */}
         <div className="row row-cols-1 row-cols-md-4 g-3 g-md-4 mb-5">
           <div className="col text-center">
@@ -288,35 +346,89 @@ function CustomOrderPage() {
           </div>
         </div>
 
-        {/* FAQ Section */}
+        {/* FAQ Section (hover/focus reveal + show more/less) */}
         <div className="card border-0 shadow-sm rounded-4 mt-5">
           <div className="card-body p-4 p-lg-5">
             <h2 className="h4 fw-bold mb-4">Frequently Asked Questions</h2>
-            <div className="vstack gap-3">
-              <div>
-                <h3 className="h6 fw-semibold mb-1">How long does a commission take?</h3>
-                <p className="text-muted mb-0">
-                  Typical turnaround is 2–4 weeks depending on size and complexity. Rush options may be available for an additional fee.
-                </p>
-              </div>
-              <div>
-                <h3 className="h6 fw-semibold mb-1">What’s included in the price?</h3>
-                <p className="text-muted mb-0">
-                  Artwork, protective varnish, and a certificate of authenticity. Framing and shipping are additional.
-                </p>
-              </div>
-              <div>
-                <h3 className="h6 fw-semibold mb-1">Can changes be requested during the process?</h3>
-                <p className="text-muted mb-0">
-                  Yes progress photos are provided and minor adjustments are welcome to ensure complete satisfaction.
-                </p>
-              </div>
+
+            <div id="faq-list" className="vstack gap-2">
+              {faqs.slice(0, visibleFaqs).map((item, idx) => (
+                <div
+                  key={`${item.q}-${idx}`}
+                  className="faq-item p-3 rounded-3"
+                  tabIndex={0}
+                  aria-haspopup="true"
+                >
+                  <div className="d-flex align-items-center justify-content-between">
+                    <span className="fw-semibold">{item.q}</span>
+                    <span className="text-muted small ms-3">Hover or focus</span>
+                  </div>
+                  <div className="faq-answer text-muted small mt-2">
+                    {item.a}
+                  </div>
+                </div>
+              ))}
             </div>
+
+            <div className="d-flex justify-content-center gap-2 mt-3">
+              {visibleFaqs < faqs.length && (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary rounded-pill px-4"
+                  onClick={() =>
+                    setVisibleFaqs((n) => Math.min(n + 4, faqs.length))
+                  }
+                  aria-controls="faq-list"
+                  aria-expanded={visibleFaqs > 4}
+                >
+                  Show more ({faqs.length - visibleFaqs} left)
+                </button>
+              )}
+
+              {visibleFaqs > 4 && (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary rounded-pill px-4"
+                  onClick={() => setVisibleFaqs(4)}
+                  aria-controls="faq-list"
+                  aria-expanded={false}
+                >
+                  Show less
+                </button>
+              )}
+            </div>
+
+            {/* Inline styles for FAQ reveal and pointer cursor */}
+            <style>{`
+              .faq-item {
+                background-color: #fff;
+                border: 1px solid #f1f5f9;
+                transition: box-shadow .18s ease, border-color .18s ease;
+                outline: none;
+                cursor: pointer; /* pointer cursor affordance */
+              }
+              .faq-item:hover,
+              .faq-item:focus-within {
+                border-color: #f3d9e3;
+                box-shadow: 0 8px 20px rgba(214, 51, 132, 0.12);
+              }
+              .faq-answer {
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                transition: max-height .25s ease, opacity .2s ease;
+              }
+              .faq-item:hover .faq-answer,
+              .faq-item:focus-within .faq-answer {
+                max-height: 200px;
+                opacity: 1;
+              }
+            `}</style>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default CustomOrderPage;
