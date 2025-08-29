@@ -3,9 +3,11 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, User, Phone, UserPlus, CheckCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
-// Helpers as arrow functions
+// Ensure cookies (refresh token) are sent/stored automatically
+axios.defaults.withCredentials = true;
+
 const strengthScore = (pw) => {
   let score = 0;
   if (!pw) return 0;
@@ -31,14 +33,10 @@ const strengthLabel = (score) => {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Component as arrow function
 const SignupPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from || '/';
-
-  // If AuthContext is available; otherwise replace register(...) with your API call
-  const { register: registerUser } = useAuth?.() || { register: async () => {} };
 
   // form state
   const [fullName, setFullName] = useState('');
@@ -82,20 +80,35 @@ const SignupPage = () => {
 
     try {
       setSubmitting(true);
-      // Replace with your own API/Auth call
-      await registerUser({
-        name: fullName.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        password
-      });
+
+      // Call backend API: POST /api/auth/register
+      const { data } = await axios.post(
+        '/api/auth/register',
+        {
+          name: fullName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          password
+        },
+        { withCredentials: true } // send/receive cookies (refresh token)
+      );
+
+      // data: { accessToken, user }
+      // Store access token (example: sessionStorage) or via your AuthContext if available
+      if (data?.accessToken) {
+        sessionStorage.setItem('accessToken', data.accessToken);
+      }
 
       setFormSuccess('Account created successfully. Redirecting...');
       setTimeout(() => {
         navigate(redirectTo, { replace: true });
       }, 800);
     } catch (err) {
-      setFormError('Could not create account. This email may already be registered.');
+      const msg =
+        err?.response?.status === 409
+          ? 'This email is already registered.'
+          : 'Could not create account. Please try again.';
+      setFormError(msg);
     } finally {
       setSubmitting(false);
     }

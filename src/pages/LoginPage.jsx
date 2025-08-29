@@ -3,17 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 const EMAIL_KEY = 'rememberEmail';
+
+// Ensure cookies (refresh token) are sent/stored automatically
+axios.defaults.withCredentials = true;
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from || '/';
-
-  // If useAuth is available; otherwise replace with your own login call.
-  const { login } = useAuth?.() || { login: async () => {} };
 
   const [email, setEmail] = useState('');
   const [remember, setRemember] = useState(false);
@@ -35,7 +35,6 @@ const LoginPage = () => {
     e.preventDefault();
     setFormError('');
 
-    // Basic front-end checks
     if (!email || !password) {
       setFormError('Please enter both email and password.');
       return;
@@ -44,18 +43,32 @@ const LoginPage = () => {
     try {
       setSubmitting(true);
 
-      // Persist remembered email
+      // Remember email preference
       if (remember) localStorage.setItem(EMAIL_KEY, email);
       else localStorage.removeItem(EMAIL_KEY);
 
-      // Perform login (replace with your API/Auth call)
-      await login(email, password);
+      // Backend login: POST /api/auth/login
+      const { data } = await axios.post(
+        '/api/auth/login',
+        { email: String(email).trim(), password },
+        { withCredentials: true } // send/receive cookies (refresh token)
+      );
 
-      // Redirect
+      // Expect: { accessToken, user }
+      if (data?.accessToken) {
+        sessionStorage.setItem('accessToken', data.accessToken);
+      }
+
+      // Optional: preload current user profile (if needed later)
+      // const me = await axios.get('/api/users/me', {
+      //   headers: { Authorization: `Bearer ${data.accessToken}` }
+      // });
+
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      // Show a friendly error
-      setFormError('Invalid email or password. Please try again.');
+      const status = err?.response?.status;
+      if (status === 401) setFormError('Invalid email or password. Please try again.');
+      else setFormError('Unable to sign in right now. Please try again.');
     } finally {
       setSubmitting(false);
     }
